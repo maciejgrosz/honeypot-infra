@@ -18,13 +18,51 @@ resource "aws_eks_node_group" "honeypot_node_group" {
   node_group_name = "honeypot-node-group"
   node_role_arn   = aws_iam_role.honeypot_node_group_role.arn
   subnet_ids     = var.pub_honeypot_subnet_id
-  instance_types = [var.instance_type]
+  # instance_types = [var.instance_type]
   scaling_config {
     desired_size = var.no_of_nodes
     max_size     = var.no_of_nodes
     min_size     = var.no_of_nodes
   }
   # Set other worker node configurations if required
+  launch_template {
+    name = aws_launch_template.honeypot_launch_template.name
+    version = aws_launch_template.honeypot_launch_template.latest_version
+  }
+}
+
+resource "aws_launch_template" "honeypot_launch_template" {
+  name = "honeypot_launch_template"
+  key_name = var.key_pair_name
+
+  # Do I need  Network interface configuration here?
+  # vpc_security_group_ids = [var.your_security_group.id, aws_eks_cluster.your-eks-cluster.vpc_config[0].cluster_security_group_id]
+
+  block_device_mappings {
+    device_name = "/dev/xvda"
+
+    ebs {
+      volume_size = 10
+      volume_type = "gp2"
+      delete_on_termination = true
+    }
+  }
+
+  image_id           = data.aws_ami.ubuntu.id
+  instance_type = var.instance_type
+}
+
+data "aws_ami" "ubuntu" {
+  most_recent = true
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+  }
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+  owners = ["099720109477"]  # Canonical owner ID
 }
 
 resource "aws_iam_role" "honeypot_eks_cluster_role" {
