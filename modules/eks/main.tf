@@ -14,7 +14,7 @@ resource "aws_eks_cluster" "my_cluster" {
 
 resource "aws_eks_node_group" "honeypot_node_group" {
   cluster_name    = aws_eks_cluster.my_cluster.name
-  node_group_name = "my-node-group"
+  node_group_name = "honeypot-node-group"
   node_role_arn   = aws_iam_role.my_node_group_role.arn
   subnet_ids     = var.pub_honeypot_subnet_id
   instance_types = [var.instance_type]
@@ -27,7 +27,7 @@ resource "aws_eks_node_group" "honeypot_node_group" {
 }
 
 resource "aws_iam_role" "my_eks_cluster_role" {
-  name = "my-eks-cluster-role"
+  name = "honeypot-eks-cluster-role"
 
   assume_role_policy = <<EOF
 {
@@ -53,8 +53,8 @@ resource "aws_iam_policy_attachment" "attach_eks_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
-resource "aws_iam_role" "my_node_group_role" {
-  name = "my-node-group-role"
+resource "aws_iam_role" "honeypot_node_group_role" {
+  name = "honeypot-node-group-role"
 
   assume_role_policy = <<EOF
 {

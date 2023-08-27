@@ -72,7 +72,7 @@ resource "aws_security_group" "honeypot_security_group" {
   vpc_id      = aws_vpc.honeypot_vpc.id
 
   ingress {
-    from_port   = var.ingress_port
+    from_port   = var.ingress_port 
     to_port     = var.ingress_port
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
