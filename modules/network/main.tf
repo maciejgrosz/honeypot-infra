@@ -1,6 +1,9 @@
 # VPC configuration
 resource "aws_vpc" "honeypot_vpc" {
   cidr_block = var.vpc_cidr_block
+  enable_dns_hostnames = true
+  # enable_dns_support = true - default true
+  # instance_tenancy = dedicated - not need
 }
 
 # Subnet configuration
@@ -41,10 +44,11 @@ resource "aws_route_table" "honeypot_route_table" {
   }
 }
 
+# Can it be one resource instead 2? 
 resource "aws_route_table_association" "pub_subnet_association" {
   count = length(aws_subnet.pub_honeypot_subnet)
   subnet_id      = aws_subnet.pub_honeypot_subnet[count.index].id
-  route_table_id = aws_route_table.honeypot_route_table.id
+  route_table_id = aws_route_table.honeypot_route_table.id  
 }
 
 resource "aws_route_table_association" "priv_subnet_association" {
@@ -53,18 +57,20 @@ resource "aws_route_table_association" "priv_subnet_association" {
   route_table_id = aws_route_table.honeypot_route_table.id
 }
 
-resource "aws_network_interface" "honeypot_nic"{
-  count = length(aws_subnet.pub_honeypot_subnet)
-  subnet_id      = aws_subnet.pub_honeypot_subnet[count.index].id
-  private_ips = [var.private_ips_nic[count.index]] 
-  security_groups = [aws_security_group.honeypot_security_group.id]
-}
+# Do i need them? 
 
-resource "aws_eip" "ip-one" {
-    count = length(aws_network_interface.honeypot_nic)
-    network_interface = aws_network_interface.honeypot_nic[count.index].id
+# resource "aws_network_interface" "honeypot_nic"{
+#   count = length(aws_subnet.pub_honeypot_subnet)
+#   subnet_id      = aws_subnet.pub_honeypot_subnet[count.index].id
+#   private_ips = [var.private_ips_nic[count.index]] 
+#   security_groups = [aws_security_group.honeypot_security_group.id]
+# }
+
+# resource "aws_eip" "ip-one" {
+#     count = length(aws_network_interface.honeypot_nic)
+#     network_interface = aws_network_interface.honeypot_nic[count.index].id
   
-}
+# }
 # Security Group configuration
 resource "aws_security_group" "honeypot_security_group" {
   name        = "honeypot-security-group"
